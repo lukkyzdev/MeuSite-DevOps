@@ -7,6 +7,7 @@
 Este projeto implementa uma esteira completa de **Integração e Entrega Contínua (CI/CD)** na nuvem AWS. O objetivo é eliminar deploys manuais: a cada `push` realizado na branch `main`, o GitHub notifica um servidor **Jenkins** hospedado em uma instância **EC2 (Ubuntu)**, que baixa o código atualizado, autentica via **IAM** e publica a nova versão automaticamente em um bucket **Amazon S3** configurado como servidor web.
 
 🌐 **Endpoint do Site (S3 Static Hosting):** `http://site-jenkins-lucas-2026-655887417298-us-east-2-an.s3-website.us-east-2.amazonaws.com`  
+
 *(Nota: A instância EC2 permanece interrompida fora dos horários de laboratório para otimização de custos na AWS).*
 
 ---
@@ -40,13 +41,15 @@ flowchart LR
 
 Todo o fluxo de entrega está versionado como código (*Pipeline as Code*) no arquivo `Jenkinsfile` na raiz deste repositório:
 
-1. **Gatilho Automático:** O webhook do GitHub dispara uma requisição para `/github-webhook/` assim que um commit entra na branch `main`.
-2. **Stage 1 — `Baixar Código do GitHub`:** O agente do Jenkins clona a versão mais recente do repositório.
-3. **Stage 2 — `Enviar para o AWS S3`:** O bloco `withAWS(credentials: 'aws-s3-creds', region: 'us-east-2')` injeta as chaves do IAM sem expô-las no código e executa o `s3Upload` atualizando o `index.html` em produção.
+1- **Gatilho Automático:** O webhook do GitHub dispara uma requisição para `/github-webhook/` assim que um commit entra na branch `main`.
+
+2- **Stage 1 — `Baixar Código do GitHub`:** O agente do Jenkins clona a versão mais recente do repositório.
+
+3- **Stage 2 — `Enviar para o AWS S3`:** O bloco `withAWS(credentials: 'aws-s3-creds', region: 'us-east-2')` injeta as chaves do IAM sem expô-las no código e executa o `s3Upload` atualizando o `index.html` em produção.
 
 ---
 
-## 🔒 Boas Práticas de Segurança e FinOps
+## 🔒 Práticas de Segurança e FinOps
 
 * **Zero segredos no repositório:** Nenhuma `Access Key` ou `Secret Key` é armazenada no `Jenkinsfile`; as credenciais ficam isoladas no cofre interno do Jenkins.
 * **Princípio do Menor Privilégio (IAM):** O usuário `jenkins-deploy` possui permissões limitadas apenas às operações necessárias no bucket do projeto, sem privilégios administrativos na conta.
@@ -54,7 +57,7 @@ Todo o fluxo de entrega está versionado como código (*Pipeline as Code*) no ar
 
 ---
 
-## 🧩 Desafios Técnicos Resolvidos na Prática
+## 🎯 Desafios Técnicos Resolvidos na Prática
 
 Durante a construção deste ambiente, foram diagnosticados e corrigidos pontos reais de infraestrutura:
 * **Liberação de Tráfego (Security Groups):** Configuração de regras de entrada na EC2 liberando a porta `22` (SSH) e a porta `8080` para permitir tanto o acesso ao painel do Jenkins quanto a comunicação externa dos Webhooks do GitHub.
@@ -65,7 +68,7 @@ Durante a construção deste ambiente, foram diagnosticados e corrigidos pontos 
 
 ## 📸 Evidências de Execução
 
-> **Instrução:** Arraste e solte aqui suas duas capturas de tela (o histórico de builds em verde no Jenkins e o site aberto no navegador pelo link do S3) diretamente no editor do GitHub e apague esta linha.
+
 
 ---
 
