@@ -2,9 +2,282 @@
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8">
-  <title>Deploy Automático com Jenkins</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Deploy automatizado com GitHub, Jenkins e AWS S3 — Lucas Fontes</title>
+  <style>
+   
+    :root {
+      --bg: #16181d;
+      --surface: #1e2128;
+      --border: #2d323e;
+      --text: #e5e7eb;
+      --muted: #9ca3af;
+      --accent: #60a5fa;
+      --status: #34d399;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      background-color: var(--bg);
+      color: var(--text);
+      line-height: 1.65;
+      padding: 2.5rem 1rem;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    .container {
+      max-width: 740px;
+      margin: 0 auto;
+      background-color: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 2.25rem 2rem;
+    }
+
+    .top-bar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 0.75rem;
+      padding-bottom: 1rem;
+      margin-bottom: 1.5rem;
+      border-bottom: 1px solid var(--border);
+      font-size: 0.85rem;
+      color: var(--muted);
+    }
+
+    .repo-label {
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+    }
+
+    .status-indicator {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.45rem;
+      color: var(--status);
+      font-size: 0.82rem;
+      font-weight: 500;
+    }
+
+    .status-dot {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background-color: var(--status);
+    }
+
+    h1 {
+      font-size: 1.6rem;
+      font-weight: 600;
+      line-height: 1.3;
+      letter-spacing: -0.015em;
+      margin-bottom: 0.85rem;
+      color: var(--text);
+    }
+
+    .intro {
+      color: var(--muted);
+      font-size: 0.98rem;
+      margin-bottom: 2rem;
+    }
+
+    h2 {
+      font-size: 1.1rem;
+      font-weight: 600;
+      color: var(--text);
+      margin-bottom: 1rem;
+      padding-bottom: 0.4rem;
+      border-bottom: 1px solid var(--border);
+    }
+
+    section {
+      margin-bottom: 2rem;
+    }
+
+    .pipeline-steps {
+      padding-left: 1.25rem;
+      color: var(--muted);
+      font-size: 0.95rem;
+    }
+
+    .pipeline-steps li {
+      margin-bottom: 0.85rem;
+      padding-left: 0.35rem;
+    }
+
+    .pipeline-steps li:last-child {
+      margin-bottom: 0;
+    }
+
+    .pipeline-steps strong {
+      color: var(--text);
+      font-weight: 600;
+    }
+
+    code {
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+      font-size: 0.85em;
+      background-color: var(--bg);
+      border: 1px solid var(--border);
+      color: var(--text);
+      padding: 0.1rem 0.38rem;
+      border-radius: 4px;
+    }
+
+    .infra-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.92rem;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      overflow: hidden;
+    }
+
+    .infra-table th,
+    .infra-table td {
+      text-align: left;
+      padding: 0.75rem 0.9rem;
+      border-bottom: 1px solid var(--border);
+      vertical-align: top;
+    }
+
+    .infra-table th {
+      background-color: var(--bg);
+      color: var(--text);
+      font-weight: 600;
+      font-size: 0.85rem;
+    }
+
+    .infra-table tr:last-child td {
+      border-bottom: none;
+    }
+
+    .infra-table td:first-child {
+      font-weight: 600;
+      color: var(--text);
+      width: 135px;
+      white-space: nowrap;
+    }
+
+    .infra-table td:last-child {
+      color: var(--muted);
+    }
+
+    footer {
+      border-top: 1px solid var(--border);
+      padding-top: 1.25rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 0.75rem;
+      font-size: 0.88rem;
+      color: var(--muted);
+    }
+
+    a {
+      color: var(--accent);
+      text-decoration: none;
+    }
+
+    a:hover {
+      text-decoration: underline;
+    }
+
+    @media (max-width: 560px) {
+      body {
+        padding: 1.25rem 0.75rem;
+      }
+
+      .container {
+        padding: 1.5rem 1.25rem;
+      }
+
+      h1 {
+        font-size: 1.35rem;
+      }
+
+      .infra-table td:first-child {
+        width: 105px;
+      }
+    }
+  </style>
 </head>
 <body>
-  <h1>Site publicado via Jenkins + GitHub + AWS S3</h1>
+  <main class="container">
+    <header>
+      <div class="top-bar">
+        <span class="repo-label">lukkyzdev / MeuSite-DevOps</span>
+        <span class="status-indicator">
+          <span class="status-dot"></span>
+          S3 Static Hosting • us-east-2
+        </span>
+      </div>
+
+      <h1>Deploy automatizado com GitHub, Jenkins e AWS S3</h1>
+      <p class="intro">
+        Oi, eu sou o Lucas. Criei este laboratório prático para eliminar uploads manuais de arquivos estáticos na nuvem, conectando os commits enviados para o GitHub diretamente ao bucket do Amazon S3 por meio de uma esteira automatizada.
+      </p>
+    </header>
+
+    <section>
+      <h2>Como funciona na prática</h2>
+      <ol class="pipeline-steps">
+        <li>
+          <strong>Gatilho no repositório:</strong> Um commit enviado para a branch <code>main</code> do repositório <code>MeuSite-DevOps</code> dispara automaticamente um Webhook (<code>HTTP POST</code>).
+        </li>
+        <li>
+          <strong>Leitura do pipeline:</strong> O Jenkins, rodando em uma instância EC2 Ubuntu, recebe o aviso e lê o <code>Jenkinsfile</code> diretamente do próprio repositório.
+        </li>
+        <li>
+          <strong>Autenticação e publicação:</strong> O pipeline baixa o código atualizado, utiliza credenciais restritas do AWS IAM configuradas no cofre do Jenkins e envia o <code>index.html</code> para o S3 via <code>s3Upload</code>.
+        </li>
+      </ol>
+    </section>
+
+    <section>
+      <h2>Detalhes da infraestrutura</h2>
+      <table class="infra-table">
+        <thead>
+          <tr>
+            <th>Serviço</th>
+            <th>Configuração</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>AWS EC2</td>
+            <td>Instância <code>t3.micro</code> (Ubuntu Server) executando o servidor Jenkins na porta <code>8080</code>.</td>
+          </tr>
+          <tr>
+            <td>Amazon S3</td>
+            <td>Hospedagem estática ativada com <em>Bucket Policy</em> de leitura pública na região <code>us-east-2</code>.</td>
+          </tr>
+          <tr>
+            <td>AWS IAM</td>
+            <td>Usuário dedicado com permissão restrita exclusivamente às operações necessárias no bucket.</td>
+          </tr>
+          <tr>
+            <td>FinOps</td>
+            <td>Instância EC2 interrompida (<em>Stopped</em>) fora dos horários de teste para evitar consumo do Free Tier.</td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+
+    <footer>
+      <span> Desenvolvido por Lucas Fontes (@lukkyzdev)</span>
+      <a href="https://github.com/lukkyzdev/MeuSite-DevOps" target="_blank" rel="noopener noreferrer">
+        Repositório do Projeto no GitHub
+      </a>
+    </footer>
+  </main>
 </body>
 </html>
