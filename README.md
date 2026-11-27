@@ -68,7 +68,11 @@ Durante a construção deste ambiente, foram diagnosticados e corrigidos pontos 
 
 ## 📸 Evidências de Execução
 
+### - Builds Jenkins 🏗
+![Builds no Jenkins](./images/builds-jenkins.png)
 
+### - Site publicado no S3 🟢
+![Site publicado no S3](./images/site-jenkins.png)
 
 ---
 
